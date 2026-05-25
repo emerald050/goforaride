@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Flowers</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- REQUIRED for image download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body class="bouquetBg">
+
+<section class="bouquetPage">
+
+  <div class="pixelPolaroid">
+
+    <h1>flowers picked</h1>
+
+    <div id="scoreboard"></div>
+
+    <button id="continueBtn">continue ></button>
+
+  </div>
+
+</section>
+
+<!-- POPUP -->
+<div id="bouquetModal" style="display:none;">
+
+ <div id="bouquetCard">
+
+  <h2>download your flowers ♡ </h2>
+
+  <!-- ONLY THIS GETS EXPORTED -->
+  <div id="exportArea">
+    <div id="frame">
+      <div id="flowerLayer"></div>
+    </div>
+  </div>
+
+  <!-- UI ONLY (NOT EXPORTED) -->
+  <div id="btnRow">
+      <button id="closeBtn">close</button>
+  <button id="downloadBtn">download</button>
+  <a href="thanks.html"><button id="nextBtn">next</button></a>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+    document.getElementById("closeBtn").addEventListener("click", () => {
+  document.getElementById("bouquetModal").style.display = "none";
+});
+/* ================= LOAD SCORE ================= */
+
+const board = document.getElementById("scoreboard");
+const saved = JSON.parse(localStorage.getItem("flowers")) || [];
+const flowerNames = {
+  "flower1.png": "Cosmo",
+  "flower2.png": "Daffodil",
+  "flower3.png": "Daisy",
+  "flower4.png": "Lavender",
+  "flower5.png": "Lily",
+  "flower6.png": "Lily of the Valley",
+  "flower7.png": "Orchid",
+  "flower8.png": "Pansy",
+  "flower9.png": "Poppy",
+  "flower10.png": "Rose",
+  "flower11.png": "Sunflower",
+  "flower12.png": "Tulip"
+};
+
+saved.forEach(src => {
+
+  const fileName = src.split("/").pop();
+
+  let row = document.createElement("div");
+  row.className = "pixelCard";
+
+  row.innerHTML = `
+    <img src="${src}">
+    <div>
+      <h3>+1 ${flowerNames[fileName]}</h3>
+      <p>picked during ride</p>
+    </div>
+  `;
+
+  board.appendChild(row);
+
+});
+
+/* ================= ELEMENTS ================= */
+
+const modal = document.getElementById("bouquetModal");
+const layer = document.getElementById("flowerLayer");
+const continueBtn = document.getElementById("continueBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+
+continueBtn.addEventListener("click", () => {
+  modal.style.display = "flex";
+  layer.innerHTML = "";
+
+  const flowers = (JSON.parse(localStorage.getItem("flowers")) || []).slice(0, 5);
+
+  const slots = [
+    { x: 5,   y: -22,  r: -10 },
+    { x: 50,  y: -22,  r: 10 },
+    { x: -50, y: -18,  r: -6 },
+    { x: 25,  y: -18, r: 12 },
+    { x: -30, y: -22, r: 0 }
+  ];
+
+  flowers.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.src = src;
+
+    const s = slots[i];
+
+    img.style.left = "50%";
+    img.style.top = "50%";
+
+    img.style.transform = `
+      translate(-50%, -50%)
+      translate(${s.x}px, ${s.y}px)
+      rotate(${s.r}deg)
+    `;
+
+    layer.appendChild(img);
+  });
+});
+/* ================= DOWNLOAD (EXACT MATCH EXPORT) ================= */
+
+downloadBtn.addEventListener("click", async () => {
+
+  const element = document.getElementById("exportArea");
+
+  const canvas = await html2canvas(element, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true
+  });
+
+  const link = document.createElement("a");
+  link.download = "bouquet.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+</script>
+
+</body>
+</html>
